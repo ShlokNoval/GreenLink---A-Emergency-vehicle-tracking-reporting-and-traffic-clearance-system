@@ -80,6 +80,4 @@ TalentForge bridges this gap by:
 - Real-time updates via Firestore
 - Clean and responsive UI
 
----
 
-## 📂 Project Structure
