@@ -19,34 +19,51 @@ import {
     addDoc,
     query,
     where,
-    updateDoc
+    updateDoc,
+    onSnapshot,
+    orderBy,
+    serverTimestamp,
+    Timestamp
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 
 // ===============================
-// LOGIN
+// LOGIN (role-based redirect)
 // ===============================
 export async function loginUser(email, password) {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "dashboard.html";
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const role = await getUserRole(cred.user.uid);
+
+    if (role === "incharge") {
+        window.location.href = "incharge.html";
+    } else if (role === "officer") {
+        window.location.href = "officer.html";
+    } else {
+        window.location.href = "choose-profile.html";
+    }
 }
 
 
 // ===============================
-// REGISTER
+// REGISTER (stores role in users collection)
 // ===============================
 export async function registerUser(name, email, password, role) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = cred.user;
 
     await setDoc(doc(db, "users", user.uid), {
         name,
         email,
         role,
-        createdAt: new Date()
+        isActive: role === "officer" ? false : null,
+        createdAt: serverTimestamp()
     });
 
-    window.location.href = "dashboard.html";
+    if (role === "incharge") {
+        window.location.href = "incharge.html";
+    } else if (role === "officer") {
+        window.location.href = "officer.html";
+    }
 }
 
 
@@ -60,178 +77,169 @@ export async function logoutUser() {
 
 
 // ===============================
-// AUTH GUARD
+// AUTH GUARD (redirects if not logged in)
 // ===============================
-export function protectPage() {
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            window.location.href = "login.html";
-        }
+export function protectPage(allowedRole) {
+    return new Promise((resolve) => {
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+            const role = await getUserRole(user.uid);
+            if (allowedRole && role !== allowedRole) {
+                window.location.href = "choose-profile.html";
+                return;
+            }
+            resolve(user);
+        });
     });
 }
 
 
 // ===============================
-// GET USER ROLE
+// GET USER DATA
 // ===============================
 export async function getUserRole(uid) {
     const userDoc = await getDoc(doc(db, "users", uid));
     return userDoc.exists() ? userDoc.data().role : null;
 }
 
-
-// ===============================
-// FREELANCER PROFILE
-// ===============================
-export async function getFreelancerProfile(uid) {
-    const profileDoc = await getDoc(doc(db, "freelancers", uid));
-    return profileDoc.exists() ? profileDoc.data() : null;
-}
-
-export async function saveFreelancerProfile(uid, profileData) {
-    await setDoc(doc(db, "freelancers", uid), {
-        ...profileData,
-        updatedAt: new Date()
-    });
+export async function getUserData(uid) {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
 }
 
 
 // ===============================
-// GET ALL FREELANCERS
+// ALERTS — Create (from emergency vehicle page)
 // ===============================
-export async function getAllFreelancers() {
-    const snapshot = await getDocs(collection(db, "freelancers"));
-
-    const freelancers = [];
-    snapshot.forEach(doc => {
-        freelancers.push({ id: doc.id, ...doc.data() });
-    });
-
-    return freelancers;
-}
-
-
-// ===============================
-// CREATE HIRE REQUEST
-// ===============================
-export async function createHireRequest(data) {
-    await addDoc(collection(db, "hireRequests"), {
-        ...data,
+export async function createAlert(alertData) {
+    const ref = await addDoc(collection(db, "alerts"), {
+        ...alertData,
         status: "pending",
-        createdAt: new Date()
-    });
-}
-
-
-// ===============================
-// GET FREELANCER REQUESTS
-// ===============================
-export async function getFreelancerRequests(uid) {
-    const q = query(
-        collection(db, "hireRequests"),
-        where("freelancerId", "==", uid)
-    );
-
-    const snapshot = await getDocs(q);
-
-    const requests = [];
-    snapshot.forEach(doc => {
-        requests.push({ id: doc.id, ...doc.data() });
-    });
-
-    return requests;
-}
-
-
-// ===============================
-// GET CLIENT REQUESTS  ✅ NEW
-// ===============================
-export async function getClientRequests(uid) {
-    const q = query(
-        collection(db, "hireRequests"),
-        where("clientId", "==", uid)
-    );
-
-    const snapshot = await getDocs(q);
-
-    const requests = [];
-    snapshot.forEach(doc => {
-        requests.push({ id: doc.id, ...doc.data() });
-    });
-
-    return requests;
-}
-
-
-// ===============================
-// UPDATE REQUEST STATUS
-// ===============================
-export async function updateRequestStatus(requestId, status) {
-    const requestRef = doc(db, "hireRequests", requestId);
-    await updateDoc(requestRef, { status });
-}
-
-
-// ===============================
-// SAVE PAYMENT RECORD
-// ===============================
-export async function savePayment(paymentData) {
-    await addDoc(collection(db, "payments"), {
-        ...paymentData,
-        createdAt: new Date()
-    });
-}
-
-
-// ===============================
-// GET PAYMENTS BY CLIENT
-// ===============================
-export async function getPaymentsByClient(uid) {
-    const q = query(
-        collection(db, "payments"),
-        where("clientId", "==", uid)
-    );
-    const snapshot = await getDocs(q);
-    const payments = [];
-    snapshot.forEach(doc => {
-        payments.push({ id: doc.id, ...doc.data() });
-    });
-    return payments;
-}
-
-
-// ===============================
-// MILESTONE CRUD
-// ===============================
-
-export async function createMilestone(data) {
-    const ref = await addDoc(collection(db, "milestones"), {
-        ...data,
-        createdAt: new Date()
+        // Initial location is the departure point
+        location: alertData.fromLocation || null,
+        assignedOfficerId: null,
+        assignedOfficerName: null,
+        createdAt: serverTimestamp(),
+        assignedAt: null,
+        clearedAt: null
     });
     return ref.id;
 }
 
-export async function getMilestonesByRequest(requestId) {
+export async function updateAlertLocation(alertId, latitude, longitude) {
+    await updateDoc(doc(db, "alerts", alertId), {
+        location: { latitude, longitude, updatedAt: serverTimestamp() }
+    });
+}
+
+
+// ===============================
+// ALERTS — Real-time listener for all non-cleared
+// Used by Incharge dashboard
+// ===============================
+export function listenAlerts(callback) {
     const q = query(
-        collection(db, "milestones"),
-        where("requestId", "==", requestId)
+        collection(db, "alerts"),
+        orderBy("createdAt", "desc")
     );
-    const snapshot = await getDocs(q);
-    const milestones = [];
-    snapshot.forEach(d => milestones.push({ id: d.id, ...d.data() }));
-    // Sort by order field on client side
-    return milestones.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return onSnapshot(q, (snapshot) => {
+        const alerts = [];
+        snapshot.forEach(doc => {
+            alerts.push({ id: doc.id, ...doc.data() });
+        });
+        callback(alerts);
+    });
 }
 
-export async function updateMilestone(milestoneId, data) {
-    const ref = doc(db, "milestones", milestoneId);
-    await updateDoc(ref, { ...data, updatedAt: new Date() });
+
+// ===============================
+// ALERTS — Listen to a single alert by ID (for driver status)
+// ===============================
+export function listenAlertById(alertId, callback) {
+    return onSnapshot(doc(db, "alerts", alertId), (docSnap) => {
+        if (docSnap.exists()) {
+            callback({ id: docSnap.id, ...docSnap.data() });
+        }
+    });
 }
 
-export async function deleteMilestone(milestoneId) {
-    const { deleteDoc } = await import(
-        "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js"
-    );
-    await deleteDoc(doc(db, "milestones", milestoneId));
+
+// ===============================
+// ALERTS — Assign to officer (used by Incharge)
+// ===============================
+export async function assignAlert(alertId, officerId, officerName) {
+    await updateDoc(doc(db, "alerts", alertId), {
+        status: "assigned",
+        assignedOfficerId: officerId,
+        assignedOfficerName: officerName,
+        assignedAt: serverTimestamp()
+    });
 }
+
+
+// ===============================
+// ALERTS — Update status (used by Officer)
+// ===============================
+export async function updateAlertStatus(alertId, status) {
+    const updates = { status };
+    if (status === "cleared") {
+        updates.clearedAt = serverTimestamp();
+    }
+    await updateDoc(doc(db, "alerts", alertId), updates);
+}
+
+
+// ===============================
+// ALERTS — Listen to officer's assigned alerts
+// ===============================
+export function listenOfficerAlerts(officerId, callback) {
+    const q = query(
+        collection(db, "alerts"),
+        where("assignedOfficerId", "==", officerId)
+    );
+    return onSnapshot(q, (snapshot) => {
+        const alerts = [];
+        snapshot.forEach(doc => {
+            alerts.push({ id: doc.id, ...doc.data() });
+        });
+        callback(alerts);
+    });
+}
+
+
+// ===============================
+// OFFICERS — Get active officers (for Incharge assignment)
+// ===============================
+export function listenActiveOfficers(callback) {
+    const q = query(
+        collection(db, "users"),
+        where("role", "==", "officer")
+    );
+    return onSnapshot(q, (snapshot) => {
+        const officers = [];
+        snapshot.forEach(doc => {
+            officers.push({ id: doc.id, ...doc.data() });
+        });
+        callback(officers);
+    });
+}
+
+
+// ===============================
+// OFFICER — Toggle active/inactive status
+// ===============================
+export async function toggleOfficerStatus(uid, isActive) {
+    await updateDoc(doc(db, "users", uid), { isActive });
+}
+
+export async function updateOfficerLocation(uid, latitude, longitude) {
+    await updateDoc(doc(db, "users", uid), {
+        location: { latitude, longitude, updatedAt: serverTimestamp() }
+    });
+}
+
+// Re-export for pages that need it
+export { auth, db, onAuthStateChanged };

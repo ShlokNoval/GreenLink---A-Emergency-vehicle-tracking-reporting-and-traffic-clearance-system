@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Emergency | GreenLink</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; flex-direction: column; }
+        .header {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+            padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .header-left .icon { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .header-left .brand { color: white; }
+        .header-left .brand-name { font-weight: 800; font-size: 1.3rem; }
+        .header-left .brand-module { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #a7f3d0; font-weight: 600; }
+        .header-back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+        .header-back:hover { color: white; }
+        .main { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 2rem; }
+        .page-title { font-size: 1.6rem; font-weight: 800; color: #064e3b; margin-bottom: 0.5rem; }
+        .page-subtitle { color: #6b7280; font-size: 0.95rem; margin-bottom: 2rem; }
+
+        /* Form & Status sections */
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-card {
+            background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
+            padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        .form-group { margin-bottom: 0; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 0.75rem;
+            font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+
+        .priority-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+        .priority-option input { display: none; }
+        .priority-label {
+            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+            padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 1rem;
+            cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .priority-label:hover { border-color: #a7f3d0; background: #f0fdf4; }
+        .priority-option input:checked + .priority-label { box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+        .priority-option:nth-child(1) input:checked + .priority-label { border-color: #ef4444; background: #fef2f2; }
+        .priority-option:nth-child(2) input:checked + .priority-label { border-color: #f59e0b; background: #fffbeb; }
+        .priority-option:nth-child(3) input:checked + .priority-label { border-color: #10b981; background: #ecfdf5; }
+        .priority-icon { font-size: 1.5rem; }
+        .priority-name { font-weight: 700; font-size: 0.75rem; }
+
+        .submit-btn {
+            width: 100%; padding: 1rem; border: none; border-radius: 0.75rem;
+            font-size: 1rem; font-weight: 700; font-family: inherit; cursor: pointer;
+            background: linear-gradient(135deg, #dc2626, #ef4444); color: white;
+            transition: all 0.3s; margin-top: 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+        }
+        .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(220,38,38,0.3); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Status tracking */
+        .status-card {
+            background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
+            padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04); text-align: center;
+        }
+        .status-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .status-title { font-size: 1.3rem; font-weight: 800; color: #064e3b; margin-bottom: 0.5rem; }
+        .status-text { color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
+
+        .progress-steps { display: flex; justify-content: center; gap: 0; margin-bottom: 2rem; position: relative; }
+        .step {
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            position: relative; z-index: 2; flex: 1; max-width: 120px;
+        }
+        .step-circle {
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1rem; font-weight: 700;
+            background: #e5e7eb; color: #9ca3af; transition: all 0.4s;
+        }
+        .step.active .step-circle { background: #fbbf24; color: #78350f; animation: stepPulse 1.5s infinite; }
+        .step.done .step-circle { background: #10b981; color: white; }
+        @keyframes stepPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } }
+        .step-label { font-size: 0.7rem; font-weight: 600; color: #9ca3af; text-align: center; }
+        .step.active .step-label { color: #92400e; }
+        .step.done .step-label { color: #065f46; }
+
+        .step-line {
+            position: absolute; top: 22px; left: 15%; right: 15%; height: 3px;
+            background: #e5e7eb; z-index: 1;
+        }
+
+        .alert-detail {
+            background: #f9fafb; border-radius: 1rem; padding: 1rem 1.25rem;
+            text-align: left; margin-bottom: 1.5rem;
+        }
+        .alert-detail-row {
+            display: flex; justify-content: space-between; padding: 0.4rem 0;
+            font-size: 0.85rem; border-bottom: 1px solid #f3f4f6;
+        }
+        .alert-detail-row:last-child { border-bottom: none; }
+        .alert-detail-row .label { color: #6b7280; font-weight: 500; }
+        .alert-detail-row .value { color: #111827; font-weight: 700; }
+
+        .new-alert-btn {
+            background: #064e3b; color: white; border: none; padding: 0.75rem 2rem;
+            border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.3s;
+        }
+        .new-alert-btn:hover { background: #059669; }
+
+        #toast {
+            position: fixed; bottom: 2rem; right: 2rem; background: #dc2626; color: white;
+            padding: 0.85rem 1.4rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500;
+            opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; z-index: 9999; pointer-events: none;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .priority-options { grid-template-columns: 1fr; }
+            .main { padding: 1rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toast"></div>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="icon">🚨</div>
+            <div class="brand">
+                <div class="brand-name">GreenLink</div>
+                <div class="brand-module">Emergency Vehicle</div>
+            </div>
+        </div>
+        <a href="choose-profile.html" class="header-back">← Back</a>
+    </header>
+
+    <main class="main">
+
+        <!-- SECTION 1: Departure Form -->
+        <div class="section active" id="formSection">
+            <h1 class="page-title">🚨 Report Emergency Departure</h1>
+            <p class="page-subtitle">Fill in your details below. Traffic control will be notified immediately.</p>
+
+            <div class="form-card">
+                <form id="departureForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Vehicle Number</label>
+                            <input type="text" id="vehicleNumber" placeholder="e.g. MH 20 M 2003" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Type</label>
+                            <select id="vehicleType" required>
+                                <option value="">Select type...</option>
+                                <option value="ambulance">🚑 Ambulance</option>
+                                <option value="fire_engine">🚒 Fire Engine</option>
+                                <option value="police">🚓 Police Vehicle</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Driver Name</label>
+                            <input type="text" id="driverName" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="driverPhone" placeholder="e.g. 9876543210" required>
+                        </div>
+                        <div class="form-group full">
+                            <label>Destination</label>
+                            <input type="text" id="destination" placeholder="e.g. City Hospital, Sector 15" required>
+                        </div>
+                        <div class="form-group full">
+                            <label>Priority Level</label>
+                            <div class="priority-options">
+                                <div class="priority-option">
+                                    <input type="radio" name="priority" id="prioCritical" value="critical" checked>
+                                    <label for="prioCritical" class="priority-label">
+                                        <span class="priority-icon">🔴</span>
+                                        <span class="priority-name">Critical</span>
+                                    </label>
+                                </div>
+                                <div class="priority-option">
+                                    <input type="radio" name="priority" id="prioHigh" value="high">
+                                    <label for="prioHigh" class="priority-label">
+                                        <span class="priority-icon">🟡</span>
+                                        <span class="priority-name">High</span>
+                                    </label>
+                                </div>
+                                <div class="priority-option">
+                                    <input type="radio" name="priority" id="prioStandard" value="standard">
+                                    <label for="prioStandard" class="priority-label">
+                                        <span class="priority-icon">🟢</span>
+                                        <span class="priority-name">Standard</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span>🚨</span> Send Departure Alert
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Live Status -->
+        <div class="section" id="statusSection">
+            <h1 class="page-title">📡 Alert Status — Live Tracking</h1>
+            <p class="page-subtitle">Your alert has been sent. Track its progress below.</p>
+
+            <div class="status-card">
+                <div class="status-icon" id="statusIcon">📡</div>
+                <h2 class="status-title" id="statusTitle">Alert Sent Successfully</h2>
+                <p class="status-text" id="statusText">Your departure alert has been sent to the Traffic Incharge. An officer will be assigned shortly.</p>
+
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="step-line" id="stepLine"></div>
+                    <div class="step done" id="step1">
+                        <div class="step-circle">✓</div>
+                        <span class="step-label">Alert Sent</span>
+                    </div>
+                    <div class="step active" id="step2">
+                        <div class="step-circle">2</div>
+                        <span class="step-label">Pending Assignment</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-circle">3</div>
+                        <span class="step-label">Officer Clearing</span>
+                    </div>
+                    <div class="step" id="step4">
+                        <div class="step-circle">✓</div>
+                        <span class="step-label">Road Cleared</span>
+                    </div>
+                </div>
+
+                <!-- Alert Details -->
+                <div class="alert-detail" id="alertDetails"></div>
+
+                <button class="new-alert-btn" onclick="resetForm()">Send Another Alert</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createAlert, listenAlertById } from "./js/auth.js";
+
+        const form = document.getElementById("departureForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const formSection = document.getElementById("formSection");
+        const statusSection = document.getElementById("statusSection");
+
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 4000);
+        }
+
+        const vehicleEmoji = { ambulance: '🚑', fire_engine: '🚒', police: '🚓' };
+
+        let fromLocation = null;
+        let locationInterval = null;
+
+        // Auto-detect current location on load
+        window.addEventListener("load", () => {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        fromLocation = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                        showToast("📍 Current location detected!");
+                    },
+                    (err) => {
+                        console.warn("Location error:", err);
+                        showToast("⚠️ Could not detect current location. Please enable GPS.");
+                    },
+                    { enableHighAccuracy: true }
+                );
+            }
+        });
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (!fromLocation) {
+                showToast("⚠️ Waiting for GPS location. Please try again in a moment.");
+                // Try again to fetch location
+                navigator.geolocation.getCurrentPosition(pos => {
+                    fromLocation = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                });
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳</span> Sending Alert...';
+
+            try {
+                const alertData = {
+                    vehicleNumber: document.getElementById("vehicleNumber").value.trim(),
+                    vehicleType: document.getElementById("vehicleType").value,
+                    driverName: document.getElementById("driverName").value.trim(),
+                    driverPhone: document.getElementById("driverPhone").value.trim(),
+                    destination: document.getElementById("destination").value.trim(),
+                    fromLocation: fromLocation,
+                    priority: document.querySelector("input[name='priority']:checked").value
+                };
+
+                const alertId = await createAlert(alertData);
+
+                // Start live location tracking
+                startLocationTracking(alertId);
+
+                // Show status section
+                formSection.classList.remove("active");
+                statusSection.classList.add("active");
+
+                // Show alert details
+                document.getElementById("alertDetails").innerHTML = `
+                    <div class="alert-detail-row"><span class="label">Vehicle</span><span class="value">${vehicleEmoji[alertData.vehicleType] || '🚗'} ${alertData.vehicleNumber}</span></div>
+                    <div class="alert-detail-row"><span class="label">Driver</span><span class="value">${alertData.driverName}</span></div>
+                    <div class="alert-detail-row"><span class="label">Destination</span><span class="value">${alertData.destination}</span></div>
+                    <div class="alert-detail-row"><span class="label">Priority</span><span class="value">${alertData.priority.toUpperCase()}</span></div>
+                `;
+
+                // Listen for real-time updates
+                listenAlertById(alertId, (alert) => {
+                    updateStatusUI(alert);
+                });
+
+            } catch (err) {
+                showToast("❌ Failed to send alert: " + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🚨</span> Send Departure Alert';
+            }
+        });
+
+        import { updateAlertLocation } from "./js/auth.js";
+
+        function startLocationTracking(alertId) {
+            if (!navigator.geolocation) {
+                console.warn("Geolocation not supported");
+                return;
+            }
+
+            // Track location every 5 seconds
+            locationInterval = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        updateAlertLocation(alertId, pos.coords.latitude, pos.coords.longitude)
+                            .catch(err => console.error("Location update failed", err));
+                    },
+                    (err) => console.warn("Geolocation error", err),
+                    { enableHighAccuracy: true }
+                );
+            }, 5000);
+        }
+
+        function updateStatusUI(alert) {
+            const s1 = document.getElementById("step1");
+            const s2 = document.getElementById("step2");
+            const s3 = document.getElementById("step3");
+            const s4 = document.getElementById("step4");
+
+            // Reset all
+            [s1, s2, s3, s4].forEach(s => { s.className = 'step'; });
+
+            if (alert.status === "pending") {
+                s1.className = 'step done';
+                s2.className = 'step active';
+                document.getElementById("statusIcon").textContent = "📡";
+                document.getElementById("statusTitle").textContent = "Waiting for Assignment";
+                document.getElementById("statusText").textContent = "Your alert is with the Traffic Incharge. An officer will be assigned shortly.";
+            } else if (alert.status === "assigned") {
+                s1.className = 'step done';
+                s2.className = 'step done';
+                s3.className = 'step active';
+                document.getElementById("statusIcon").textContent = "👮";
+                document.getElementById("statusTitle").textContent = "Officer Assigned: " + (alert.assignedOfficerName || "");
+                document.getElementById("statusText").textContent = "An on-duty officer is preparing to clear your route. Hold tight!";
+            } else if (alert.status === "clearing") {
+                s1.className = 'step done';
+                s2.className = 'step done';
+                s3.className = 'step active';
+                document.getElementById("statusIcon").textContent = "🚦";
+                document.getElementById("statusTitle").textContent = "Road Being Cleared";
+                document.getElementById("statusText").textContent = "Officer " + (alert.assignedOfficerName || "") + " is actively clearing the road for you.";
+            } else if (alert.status === "cleared") {
+                s1.className = 'step done';
+                s2.className = 'step done';
+                s3.className = 'step done';
+                s4.className = 'step done';
+                document.getElementById("statusIcon").textContent = "✅";
+                document.getElementById("statusTitle").textContent = "Road Cleared!";
+                document.getElementById("statusText").textContent = "The road has been cleared for your vehicle. Drive safely!";
+                if (locationInterval) clearInterval(locationInterval);
+            }
+        }
+
+        // Expose resetForm globally
+        window.resetForm = function () {
+            if (locationInterval) clearInterval(locationInterval);
+            form.reset();
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>🚨</span> Send Departure Alert';
+            statusSection.classList.remove("active");
+            formSection.classList.add("active");
+        };
+    </script>
+</body>
+
+</html>
