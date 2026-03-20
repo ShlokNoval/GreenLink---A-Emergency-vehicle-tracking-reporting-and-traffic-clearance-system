@@ -1,5 +1,5 @@
 # GreenLink 🚨
-Emergency Vehicle Priority System — Real-time coordination between emergency vehicles, traffic incharge, and on-duty officers.
+Emergency Vehicle Priority System - Real-time coordination between emergency vehicles, traffic incharge, and on-duty officers.
 
 ---
 
