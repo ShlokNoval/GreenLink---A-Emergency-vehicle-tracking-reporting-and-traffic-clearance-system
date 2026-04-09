@@ -8,129 +8,138 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; flex-direction: column; }
-        .header {
-            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
-            padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles/global.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .header-left { display: flex; align-items: center; gap: 0.75rem; }
-        .header-left .icon { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .header-left .brand { color: white; }
-        .header-left .brand-name { font-weight: 800; font-size: 1.3rem; }
-        .header-left .brand-module { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #a7f3d0; font-weight: 600; }
-        .header-back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
-        .header-back:hover { color: white; }
-        .main { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 2rem; }
-        .page-title { font-size: 1.6rem; font-weight: 800; color: #064e3b; margin-bottom: 0.5rem; }
-        .page-subtitle { color: #6b7280; font-size: 0.95rem; margin-bottom: 2rem; }
+        .header {
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 1rem 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        .header-left { display: flex; align-items: center; gap: 0.8rem; }
+        .header-left .icon { font-size: 1.5rem; filter: drop-shadow(0 0 10px var(--primary)); }
+        .header-left .brand-name { font-weight: 900; font-size: 1.4rem; color: var(--primary); letter-spacing: -0.5px; }
+        .header-left .brand-module { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); font-weight: 700; margin-left: 0.5rem; }
+        .header-back { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.3s; }
+        .header-back:hover { color: var(--primary); }
+        
+        .main { flex: 1; max-width: 900px; margin: 0 auto; width: 100%; padding: 8rem 2rem 4rem; position: relative; z-index: 10; }
+        .page-title { font-size: 2.2rem; font-weight: 950; color: white; margin-bottom: 0.75rem; letter-spacing: -1px; }
+        .page-subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 3rem; }
 
         /* Form & Status sections */
         .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .section.active { display: block; animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .form-card {
-            background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
-            padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            padding: 3rem;
         }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-        .form-group { margin-bottom: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
         .form-group.full { grid-column: 1 / -1; }
-        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 0.75rem;
-            font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s;
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-dim); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, select {
+            width: 100%; padding: 1rem 1.25rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); border-radius: 1.25rem;
+            font-size: 1rem; color: white; font-family: inherit; outline: none; transition: all 0.3s;
         }
-        .form-group input:focus, .form-group select:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        input:focus, select:focus { border-color: var(--primary); background: rgba(16, 185, 129, 0.05); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
 
-        .priority-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+        .priority-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
         .priority-option input { display: none; }
         .priority-label {
-            display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-            padding: 0.8rem; border: 2px solid #e5e7eb; border-radius: 1rem;
-            cursor: pointer; transition: all 0.2s; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+            padding: 1.5rem 1rem; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02); border-radius: 1.5rem;
+            cursor: pointer; transition: all 0.3s ease; text-align: center;
         }
-        .priority-label:hover { border-color: #a7f3d0; background: #f0fdf4; }
-        .priority-option input:checked + .priority-label { box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
-        .priority-option:nth-child(1) input:checked + .priority-label { border-color: #ef4444; background: #fef2f2; }
-        .priority-option:nth-child(2) input:checked + .priority-label { border-color: #f59e0b; background: #fffbeb; }
-        .priority-option:nth-child(3) input:checked + .priority-label { border-color: #10b981; background: #ecfdf5; }
-        .priority-icon { font-size: 1.5rem; }
-        .priority-name { font-weight: 700; font-size: 0.75rem; }
+        .priority-label:hover { border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); }
+        .priority-option input:checked + .priority-label { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        .priority-option:nth-child(1) input:checked + .priority-label { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        .priority-option:nth-child(2) input:checked + .priority-label { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); box-shadow: 0 0 30px rgba(245, 158, 11, 0.15); }
+        .priority-option:nth-child(3) input:checked + .priority-label { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); box-shadow: 0 0 30px rgba(16, 185, 129, 0.15); }
+        
+        .priority-icon { font-size: 2.2rem; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); }
+        .priority-name { font-weight: 800; font-size: 0.9rem; color: white; margin-top: 0.2rem; }
 
         .submit-btn {
-            width: 100%; padding: 1rem; border: none; border-radius: 0.75rem;
-            font-size: 1rem; font-weight: 700; font-family: inherit; cursor: pointer;
-            background: linear-gradient(135deg, #dc2626, #ef4444); color: white;
-            transition: all 0.3s; margin-top: 1.5rem;
-            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+            width: 100%; margin-top: 2rem; justify-content: center; padding: 1.25rem; font-size: 1.1rem;
         }
-        .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(220,38,38,0.3); }
-        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* Status tracking */
         .status-card {
-            background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
-            padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.04); text-align: center;
+            padding: 4rem 3rem; text-align: center;
         }
-        .status-icon { font-size: 4rem; margin-bottom: 1rem; }
-        .status-title { font-size: 1.3rem; font-weight: 800; color: #064e3b; margin-bottom: 0.5rem; }
-        .status-text { color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.6; }
+        .status-icon { font-size: 5rem; margin-bottom: 2rem; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3)); }
+        .status-title { font-size: 2rem; font-weight: 950; color: white; margin-bottom: 1rem; letter-spacing: -1px; }
+        .status-text { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 4rem; line-height: 1.7; max-width: 600px; margin-left: auto; margin-right: auto; }
 
-        .progress-steps { display: flex; justify-content: center; gap: 0; margin-bottom: 2rem; position: relative; }
+        .progress-steps { display: flex; justify-content: center; gap: 0; margin-bottom: 4rem; position: relative; max-width: 600px; margin-left: auto; margin-right: auto; }
         .step {
-            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-            position: relative; z-index: 2; flex: 1; max-width: 120px;
+            display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+            position: relative; z-index: 2; flex: 1;
         }
         .step-circle {
-            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; font-size: 1rem; font-weight: 700;
-            background: #e5e7eb; color: #9ca3af; transition: all 0.4s;
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.1rem; font-weight: 800;
+            background: rgba(255, 255, 255, 0.05); color: var(--text-dim); border: 2px solid var(--glass-border); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .step.active .step-circle { background: #fbbf24; color: #78350f; animation: stepPulse 1.5s infinite; }
-        .step.done .step-circle { background: #10b981; color: white; }
-        @keyframes stepPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } }
-        .step-label { font-size: 0.7rem; font-weight: 600; color: #9ca3af; text-align: center; }
-        .step.active .step-label { color: #92400e; }
-        .step.done .step-label { color: #065f46; }
+        .step.active .step-circle { background: #fbbf24; color: #000; border-color: transparent; box-shadow: 0 0 30px rgba(251, 191, 36, 0.4); animation: stepPulse 2s infinite; }
+        .step.done .step-circle { background: var(--primary); color: white; border-color: transparent; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+        
+        @keyframes stepPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .step-label { font-size: 0.8rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .step.active .step-label { color: #fbbf24; }
+        .step.done .step-label { color: var(--primary); }
 
         .step-line {
-            position: absolute; top: 22px; left: 15%; right: 15%; height: 3px;
-            background: #e5e7eb; z-index: 1;
+            position: absolute; top: 25px; left: 12.5%; right: 12.5%; height: 2px;
+            background: var(--glass-border); z-index: 1;
         }
 
         .alert-detail {
-            background: #f9fafb; border-radius: 1rem; padding: 1rem 1.25rem;
-            text-align: left; margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 1.5rem; padding: 2rem;
+            text-align: left; margin-bottom: 3rem; max-width: 500px; margin-left: auto; margin-right: auto;
         }
         .alert-detail-row {
-            display: flex; justify-content: space-between; padding: 0.4rem 0;
-            font-size: 0.85rem; border-bottom: 1px solid #f3f4f6;
+            display: flex; justify-content: space-between; padding: 0.75rem 0;
+            font-size: 0.95rem; border-bottom: 1px solid var(--glass-border);
         }
         .alert-detail-row:last-child { border-bottom: none; }
-        .alert-detail-row .label { color: #6b7280; font-weight: 500; }
-        .alert-detail-row .value { color: #111827; font-weight: 700; }
+        .alert-detail-row .label { color: var(--text-dim); font-weight: 600; }
+        .alert-detail-row .value { color: white; font-weight: 800; }
 
         .new-alert-btn {
-            background: #064e3b; color: white; border: none; padding: 0.75rem 2rem;
-            border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-            font-family: inherit; transition: all 0.3s;
+            background: transparent; border: 1px solid var(--glass-border); color: var(--text-dim); padding: 0.9rem 2.5rem;
+            border-radius: 999px; font-size: 0.95rem; font-weight: 750; cursor: pointer;
+            transition: all 0.3s;
         }
-        .new-alert-btn:hover { background: #059669; }
+        .new-alert-btn:hover { background: rgba(255,255,255,0.05); color: white; border-color: white; }
 
         #toast {
-            position: fixed; bottom: 2rem; right: 2rem; background: #dc2626; color: white;
-            padding: 0.85rem 1.4rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500;
-            opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; z-index: 9999; pointer-events: none;
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: rgba(220, 38, 38, 0.9); backdrop-filter: blur(10px); color: white;
+            padding: 1rem 2.5rem; border-radius: 999px; font-size: 0.9rem; font-weight: 750;
+            opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10000; pointer-events: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
         }
-        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        @media (max-width: 640px) {
-            .form-grid { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .header { padding: 1rem 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 1.5rem; }
             .priority-options { grid-template-columns: 1fr; }
-            .main { padding: 1rem; }
+            .page-title { font-size: 1.8rem; }
+            .status-card { padding: 3rem 1.5rem; }
         }
     </style>
 </head>
@@ -138,25 +147,32 @@
 <body>
     <div id="toast"></div>
 
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <header class="header">
         <div class="header-left">
             <div class="icon">🚨</div>
             <div class="brand">
-                <div class="brand-name">GreenLink</div>
-                <div class="brand-module">Emergency Vehicle</div>
+                <span class="brand-name">GreenLink</span>
+                <span class="brand-module">Rescue Module</span>
             </div>
         </div>
         <a href="choose-profile.html" class="header-back">← Back</a>
     </header>
 
+
     <main class="main">
 
         <!-- SECTION 1: Departure Form -->
         <div class="section active" id="formSection">
-            <h1 class="page-title">🚨 Report Emergency Departure</h1>
-            <p class="page-subtitle">Fill in your details below. Traffic control will be notified immediately.</p>
+            <h1 class="page-title reveal visible">🚨 Report Departure</h1>
+            <p class="page-subtitle reveal visible">Notify traffic control of your emergency immediately.</p>
 
-            <div class="form-card">
+            <div class="form-card glass-card reveal visible">
                 <form id="departureForm">
                     <div class="form-grid">
                         <div class="form-group">
@@ -212,7 +228,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn">
+                    <button type="submit" class="btn-premium submit-btn" id="submitBtn">
                         <span>🚨</span> Send Departure Alert
                     </button>
                 </form>
@@ -221,12 +237,12 @@
 
         <!-- SECTION 2: Live Status -->
         <div class="section" id="statusSection">
-            <h1 class="page-title">📡 Alert Status — Live Tracking</h1>
-            <p class="page-subtitle">Your alert has been sent. Track its progress below.</p>
+            <h1 class="page-title reveal visible">📡 Live Status</h1>
+            <p class="page-subtitle reveal visible">Tracking your alert in real-time coordination.</p>
 
-            <div class="status-card">
+            <div class="status-card glass-card reveal visible">
                 <div class="status-icon" id="statusIcon">📡</div>
-                <h2 class="status-title" id="statusTitle">Alert Sent Successfully</h2>
+                <h2 class="status-title" id="statusTitle">Alert Sent</h2>
                 <p class="status-text" id="statusText">Your departure alert has been sent to the Traffic Incharge. An officer will be assigned shortly.</p>
 
                 <!-- Progress Steps -->
@@ -237,23 +253,23 @@
                         <span class="step-label">Alert Sent</span>
                     </div>
                     <div class="step active" id="step2">
-                        <div class="step-circle">2</div>
-                        <span class="step-label">Pending Assignment</span>
+                        <div class="step-circle">02</div>
+                        <span class="step-label">Assigned</span>
                     </div>
                     <div class="step" id="step3">
-                        <div class="step-circle">3</div>
-                        <span class="step-label">Officer Clearing</span>
+                        <div class="step-circle">03</div>
+                        <span class="step-label">Clearing</span>
                     </div>
                     <div class="step" id="step4">
                         <div class="step-circle">✓</div>
-                        <span class="step-label">Road Cleared</span>
+                        <span class="step-label">Cleared</span>
                     </div>
                 </div>
 
                 <!-- Alert Details -->
                 <div class="alert-detail" id="alertDetails"></div>
 
-                <button class="new-alert-btn" onclick="resetForm()">Send Another Alert</button>
+                <button class="new-alert-btn" onclick="resetForm()">← Back to Reports</button>
             </div>
         </div>
     </main>

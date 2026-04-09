@@ -27,19 +27,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 
-// ===============================
-// LOGIN (role-based redirect)
-// ===============================
 export async function loginUser(email, password) {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const role = await getUserRole(cred.user.uid);
+    try {
+        console.log("Attempting login for:", email);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        console.log("Auth successful, fetching role for UID:", cred.user.uid);
+        const role = await getUserRole(cred.user.uid);
+        console.log("User role detected:", role);
 
-    if (role === "incharge") {
-        window.location.href = "incharge.html";
-    } else if (role === "officer") {
-        window.location.href = "officer.html";
-    } else {
-        window.location.href = "choose-profile.html";
+        if (role === "incharge") {
+            window.location.href = "incharge.html";
+        } else if (role === "officer") {
+            window.location.href = "officer.html";
+        } else {
+            console.warn("User has no role assigned. Redirecting to profile selection.");
+            window.location.href = "choose-profile.html";
+        }
+    } catch (error) {
+        console.error("Login Error:", error);
+        throw error;
     }
 }
 

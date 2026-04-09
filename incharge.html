@@ -12,175 +12,214 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; flex-direction: column; }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/global.css">
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
-            padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 1rem 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
-        .header-left { display: flex; align-items: center; gap: 0.75rem; }
-        .header-left .icon { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .header-left .brand { color: white; }
-        .header-left .brand-name { font-weight: 800; font-size: 1.3rem; }
-        .header-left .brand-module { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #fbbf24; font-weight: 600; }
-        .header-right { display: flex; align-items: center; gap: 1rem; }
+        .header-left { display: flex; align-items: center; gap: 0.8rem; }
+        .header-left .icon { font-size: 1.5rem; filter: drop-shadow(0 0 10px var(--primary)); }
+        .header-left .brand-name { font-weight: 950; font-size: 1.4rem; color: var(--primary); letter-spacing: -1px; }
+        .header-left .brand-module { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); font-weight: 750; margin-left: 0.5rem; }
+        
+        .header-right { display: flex; align-items: center; gap: 1.5rem; }
         .user-badge {
-            display: flex; align-items: center; gap: 0.5rem;
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
-            padding: 0.5rem 1rem; border-radius: 0.75rem; color: white; font-size: 0.85rem; font-weight: 600;
+            display: flex; align-items: center; gap: 0.6rem;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            padding: 0.6rem 1.25rem; border-radius: 1rem; color: white; font-size: 0.9rem; font-weight: 750;
         }
         .logout-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            color: white; padding: 0.5rem 1rem; border-radius: 0.75rem;
-            font-size: 0.82rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.2s;
+            background: transparent; border: 1px solid var(--glass-border);
+            color: var(--text-dim); padding: 0.6rem 1.25rem; border-radius: 1rem;
+            font-size: 0.85rem; font-weight: 750; cursor: pointer; transition: all 0.3s;
         }
-        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+        .logout-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.05); }
 
         /* Main */
-        .main { flex: 1; max-width: 1280px; margin: 0 auto; width: 100%; padding: 1.5rem 2rem; display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+        .main { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 8rem 2rem 4rem; display: grid; grid-template-columns: 1.8fr 1fr; gap: 2rem; position: relative; z-index: 10; }
 
         /* Panel */
         .panel {
-            background: white; border-radius: 1.25rem; border: 1px solid #e5e7eb;
-            overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            overflow: hidden; display: flex; flex-direction: column; height: fit-content; max-height: 85vh;
         }
         .panel-header {
-            padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6;
-            display: flex; align-items: center; gap: 0.6rem;
-            font-weight: 700; font-size: 0.95rem; color: #064e3b;
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 0.8rem;
+            font-weight: 950; font-size: 1.1rem; color: white;
+            background: rgba(255,255,255,0.02);
         }
         .panel-header .count-badge {
-            margin-left: auto; font-size: 0.7rem; font-weight: 700;
-            padding: 0.25rem 0.7rem; border-radius: 999px;
+            margin-left: auto; font-size: 0.75rem; font-weight: 900;
+            padding: 0.4rem 1rem; border-radius: 999px;
+            background: var(--primary); color: white;
         }
-        .panel-body { padding: 1rem 1.5rem; max-height: calc(100vh - 200px); overflow-y: auto; }
+        .panel-body { padding: 1.5rem 2rem; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--glass-border) transparent; }
 
         /* Alert cards */
         .alert-card {
-            padding: 1rem 1.25rem; border-radius: 1rem; border: 1px solid #f3f4f6;
-            margin-bottom: 0.75rem; transition: all 0.3s; background: #f9fafb;
+            padding: 1.75rem; border-radius: 1.25rem; border: 1px solid var(--glass-border);
+            margin-bottom: 1.25rem; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(255,255,255,0.02); position: relative;
         }
-        .alert-card.critical { background: #fef2f2; border-color: #fecaca; }
-        .alert-card.high { background: #fffbeb; border-color: #fde68a; }
-        .alert-card.assigned { background: #eff6ff; border-color: #bfdbfe; }
-        .alert-card.clearing { background: #f0fdf4; border-color: #a7f3d0; }
-        .alert-card.cleared { background: #f9fafb; border-color: #e5e7eb; opacity: 0.6; }
-        .alert-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
-        .alert-vehicle { display: flex; align-items: center; gap: 0.5rem; }
-        .alert-vehicle .emoji { font-size: 1.3rem; }
+        .alert-card.critical { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+        .alert-card.high { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
+        .alert-card.assigned { border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+        .alert-card.cleared { opacity: 0.5; filter: grayscale(0.5); }
+
+        .alert-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .alert-vehicle { display: flex; align-items: center; gap: 0.8rem; }
+        .alert-vehicle .emoji { font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(0,0,0,0.3)); }
         .alert-vehicle .plate {
-            font-family: 'JetBrains Mono', monospace; font-weight: 700;
-            font-size: 0.9rem; color: #111827; letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 800;
+            font-size: 1.1rem; color: white; letter-spacing: 1px;
         }
         .alert-priority {
-            font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.6rem;
-            border-radius: 999px; text-transform: uppercase;
+            font-size: 0.7rem; font-weight: 900; padding: 0.3rem 0.8rem;
+            border-radius: 999px; text-transform: uppercase; letter-spacing: 1px;
         }
-        .alert-priority.critical { background: #fee2e2; color: #dc2626; }
-        .alert-priority.high { background: #fef3c7; color: #d97706; }
-        .alert-priority.standard { background: #dcfce7; color: #059669; }
-        .alert-meta { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.75rem; line-height: 1.5; }
+        .alert-priority.critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .alert-priority.high { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .alert-priority.standard { background: rgba(16, 185, 129, 0.2); color: var(--primary); }
+
+        .alert-meta { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem; line-height: 1.7; }
+        .alert-meta strong { color: white; font-weight: 800; }
+        
         .alert-status-badge {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 999px;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.75rem; font-weight: 800; padding: 0.4rem 1rem; border-radius: 999px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-assigned { background: #dbeafe; color: #1e40af; }
-        .status-clearing { background: #dcfce7; color: #166534; }
-        .status-cleared { background: #e5e7eb; color: #374151; }
+        .status-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .status-assigned { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .status-clearing { background: rgba(16, 185, 129, 0.1); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-cleared { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); border: 1px solid var(--glass-border); }
+
         .assign-btn {
-            background: linear-gradient(135deg, #059669, #10b981); color: white;
-            border: none; padding: 0.5rem 1rem; border-radius: 0.6rem;
-            font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit;
-            margin-top: 0.5rem; transition: all 0.2s;
+            width: 100%; justify-content: center; margin-top: 1rem; padding: 0.9rem;
         }
-        .assign-btn:hover { box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
 
         /* Officers panel */
         .officer-card {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid #f3f4f6;
-            margin-bottom: 0.5rem; background: #f9fafb;
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1.25rem; border-radius: 1.25rem; border: 1px solid var(--glass-border);
+            margin-bottom: 0.75rem; background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s;
         }
+        .officer-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
         .officer-avatar {
-            width: 36px; height: 36px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700;
-            background: #e0e7ff; color: #3730a3;
+            width: 44px; height: 44px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900;
+            background: rgba(16, 185, 129, 0.1); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2);
         }
         .officer-info { flex: 1; }
-        .officer-name { font-size: 0.85rem; font-weight: 700; color: #111827; }
-        .officer-email { font-size: 0.7rem; color: #9ca3af; }
+        .officer-name { font-size: 0.95rem; font-weight: 850; color: white; display: flex; align-items: center; gap: 0.5rem; }
+        .officer-email { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; margin-top: 0.1rem; }
         .officer-status {
-            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid #020617;
         }
-        .officer-status.active { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-        .officer-status.inactive { background: #d1d5db; }
+        .officer-status.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .officer-status.inactive { background: #374151; }
 
-        .empty-state { text-align: center; padding: 2rem; color: #9ca3af; font-size: 0.9rem; }
-        .empty-state .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+        .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-dim); }
+        .empty-state .emoji { font-size: 3rem; opacity: 0.2; margin-bottom: 1rem; }
+        .empty-state p { font-weight: 600; }
 
         /* Modal */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+            position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(10px); z-index: 2000;
             display: none; align-items: center; justify-content: center; padding: 1rem;
         }
         .modal-overlay.open { display: flex; }
         .modal {
-            background: white; border-radius: 1.25rem; padding: 2rem;
-            width: 100%; max-width: 440px; box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+            background: #020617; border-radius: 2rem; padding: 2.5rem;
+            width: 100%; max-width: 500px; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border: 1px solid var(--glass-border); position: relative;
         }
-        .modal h3 { font-size: 1.1rem; font-weight: 800; color: #064e3b; margin-bottom: 0.5rem; }
-        .modal p { font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem; }
-        .modal-officer-list { max-height: 250px; overflow-y: auto; }
+        .modal h3 { font-size: 1.6rem; font-weight: 950; color: white; margin-bottom: 0.5rem; letter-spacing: -1px; }
+        .modal p { color: var(--text-dim); margin-bottom: 1.5rem; font-weight: 600; }
+        .modal-officer-list { max-height: 300px; overflow-y: auto; padding-right: 0.5rem; }
         .modal-officer {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.75rem 1rem; border-radius: 0.75rem; border: 2px solid #e5e7eb;
-            margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1.25rem; border-radius: 1.25rem; border: 1.5px solid var(--glass-border);
+            margin-bottom: 0.75rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(255, 255, 255, 0.02);
         }
-        .modal-officer:hover { border-color: #10b981; background: #f0fdf4; }
-        .modal-officer.selected { border-color: #10b981; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
-        .modal-officer .name { font-weight: 700; font-size: 0.85rem; }
-        .modal-officer .status-text { font-size: 0.7rem; color: #6b7280; }
-        .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
-        .modal-actions button {
-            flex: 1; padding: 0.7rem; border-radius: 0.75rem; font-size: 0.85rem;
-            font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;
-        }
-        .modal-cancel { background: #f3f4f6; border: none; color: #374151; }
-        .modal-confirm { background: #059669; border: none; color: white; }
-        .modal-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-officer:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        .modal-officer.selected { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
+        .modal-officer .name { font-weight: 850; font-size: 0.95rem; color: white; }
+        .modal-officer .status-text { font-size: 0.75rem; color: var(--primary); font-weight: 750; margin-top: 0.1rem; }
+        
+        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+        .modal-actions button { flex: 1; padding: 1rem; border-radius: 999px; font-weight: 800; font-size: 0.95rem; }
+        .modal-cancel { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-dim); }
+        .modal-confirm { background: var(--primary); border: none; color: white; }
+        .modal-confirm:disabled { opacity: 0.5; filter: grayscale(1); }
 
         /* Map Utility */
-        #map { height: 350px; width: 100%; border-radius: 1rem; margin-top: 1rem; }
-        .alert-map-preview { height: 180px; width: 100%; border-radius: 0.75rem; margin: 0.75rem 0; border: 1px solid #e5e7eb; }
+        #map { height: 400px; width: 100%; border-radius: 1.5rem; border: 1px solid var(--glass-border); }
+        .alert-map-preview { height: 220px; width: 100%; border-radius: 1.25rem; margin: 1.5rem 0; border: 1px solid var(--glass-border); overflow: hidden; }
         
         .track-btn {
-            background: #1e293b; color: white; border: none; padding: 0.4rem 0.8rem;
-            border-radius: 0.6rem; font-size: 0.72rem; font-weight: 600; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.5rem;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-dim); 
+            padding: 0.4rem 0.8rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 750; cursor: pointer;
+            transition: all 0.3s;
         }
-        .track-btn:hover { background: #0f172a; }
+        .track-btn:hover { border-color: white; color: white; background: rgba(255, 255, 255, 0.1); }
 
-        .loading { text-align: center; padding: 3rem; color: #9ca3af; }
+        .loading { text-align: center; padding: 4rem; color: var(--text-dim); font-weight: 600; }
 
+        /* Dark Map Adjustments */
+        .leaflet-container { background: #020617 !important; }
+        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+
+        @media (max-width: 1024px) {
+            .main { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
-            .main { grid-template-columns: 1fr; padding: 1rem; }
-            .header { flex-wrap: wrap; gap: 0.5rem; }
+            .header { padding: 1rem 1.5rem; }
+            .main { padding: 8rem 1.5rem 4rem; }
+            .alert-card { padding: 1.25rem; }
+            .alert-top { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
         }
     </style>
 </head>
 
 <body>
+    <div id="toast"></div>
+
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <div class="icon">🚨</div>
             <div class="brand">
-                <div class="brand-name">GreenLink</div>
-                <div class="brand-module">Traffic Incharge</div>
+                <span class="brand-name">GreenLink</span>
+                <span class="brand-module">Incharge Module</span>
             </div>
         </div>
         <div class="header-right">
@@ -192,24 +231,24 @@
     <!-- Main -->
     <main class="main">
         <!-- Alerts Panel -->
-        <div class="panel">
+        <div class="panel glass-card reveal visible">
             <div class="panel-header">
-                <span>🚨</span> Incoming Alerts
-                <span class="count-badge" id="alertCount" style="background:#fef3c7;color:#92400e;">0</span>
+                <span>🚨</span> Active Rescue Alerts
+                <span class="count-badge" id="alertCount">0</span>
             </div>
             <div class="panel-body" id="alertsContainer">
-                <div class="loading">Loading alerts...</div>
+                <div class="loading">Initializing system alerts...</div>
             </div>
         </div>
 
         <!-- Officers Panel -->
-        <div class="panel">
+        <div class="panel glass-card reveal visible">
             <div class="panel-header">
-                <span>👮</span> On-Duty Officers
-                <span class="count-badge" id="officerCount" style="background:#dcfce7;color:#166534;">0</span>
+                <span>👮</span> Personnel Status
+                <span class="count-badge" id="officerCount">0</span>
             </div>
             <div class="panel-body" id="officersContainer">
-                <div class="loading">Loading officers...</div>
+                <div class="loading">Loading personnel data...</div>
             </div>
         </div>
     </main>
@@ -217,24 +256,24 @@
     <!-- Assignment Modal -->
     <div class="modal-overlay" id="assignModal">
         <div class="modal">
-            <h3>Assign Officer</h3>
-            <p>Select an active on-duty officer to handle clearance for <strong id="modalVehicle"></strong></p>
+            <h3>Dispatch Officer</h3>
+            <p>Select an on-duty officer for <strong id="modalVehicle"></strong></p>
             <div class="modal-officer-list" id="modalOfficerList"></div>
             <div class="modal-actions">
-                <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-                <button class="modal-confirm" id="confirmAssignBtn" disabled onclick="confirmAssignment()">Assign Officer</button>
+                <button class="modal-cancel" onclick="closeModal()">Abot</button>
+                <button class="modal-confirm btn-premium" id="confirmAssignBtn" disabled onclick="confirmAssignment()">Confirm Dispatch</button>
             </div>
         </div>
     </div>
 
     <!-- Map Modal -->
     <div class="modal-overlay" id="mapModal">
-        <div class="modal" style="max-width: 600px;">
-            <h3 id="mapTitle">Live Tracking</h3>
-            <p id="mapSubtitle">Real-time GPS location from vehicle/officer</p>
+        <div class="modal">
+            <h3 id="mapTitle">Tactical View</h3>
+            <p id="mapSubtitle">Real-time GPS coordination</p>
             <div id="map"></div>
             <div class="modal-actions">
-                <button class="modal-confirm" onclick="closeMapModal()">Close Tracker</button>
+                <button class="modal-confirm btn-premium" onclick="closeMapModal()">Close View</button>
             </div>
         </div>
     </div>
