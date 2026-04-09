@@ -98,6 +98,17 @@
             color: #ffffff !important;
         }
 
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
         /* ─── 3D Perspective Container ─── */
         .scene {
             perspective: 2000px;
@@ -499,6 +510,7 @@
 <body>
 
     <div class="ambient-bg">
+        <canvas id="particle-canvas"></canvas>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
@@ -762,6 +774,7 @@
             });
         });
     </script>
+    <script src="js/particles.js"></script>
 </body>
 
 </html>
