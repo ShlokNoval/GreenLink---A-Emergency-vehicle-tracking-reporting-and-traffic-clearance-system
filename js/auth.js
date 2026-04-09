@@ -51,13 +51,21 @@ export async function registerUser(name, email, password, role) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const user = cred.user;
 
-    await setDoc(doc(db, "users", user.uid), {
-        name,
-        email,
-        role,
-        isActive: role === "officer" ? false : null,
-        createdAt: serverTimestamp()
-    });
+    try {
+        await setDoc(doc(db, "users", user.uid), {
+            name,
+            email,
+            role,
+            isActive: role === "officer" ? false : null,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Firestore Error in registerUser:", error);
+        if (error.code === 'permission-denied') {
+            throw new Error("Missing or insufficient permissions in Firestore. Please update your security rules.");
+        }
+        throw error;
+    }
 
     if (role === "incharge") {
         window.location.href = "incharge.html";
@@ -101,8 +109,16 @@ export function protectPage(allowedRole) {
 // GET USER DATA
 // ===============================
 export async function getUserRole(uid) {
-    const userDoc = await getDoc(doc(db, "users", uid));
-    return userDoc.exists() ? userDoc.data().role : null;
+    try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        return userDoc.exists() ? userDoc.data().role : null;
+    } catch (error) {
+        console.error("Firestore Error in getUserRole:", error);
+        if (error.code === 'permission-denied') {
+            throw new Error("Cannot read user role: Permission denied. Check Firestore security rules.");
+        }
+        throw error;
+    }
 }
 
 export async function getUserData(uid) {
