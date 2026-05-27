@@ -139,3 +139,11 @@ python -m http.server 5000
 ```bash
 npx http-server -p 5000
 ```
+
+---
+
+## 🌐 Deployment
+
+The project is already deployed and accessible online via Netlify.
+
+* **Live URL**: [https://greenlinkdt.netlify.app/](https://greenlinkdt.netlify.app/)
